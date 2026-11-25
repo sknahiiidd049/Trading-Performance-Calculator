@@ -1,0 +1,372 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trading Risk Reward Calculator</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+  color: #172033;
+}
+
+.container {
+  max-width: 850px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 5px 25px #00000012;
+}
+
+h1 {
+  text-align: center;
+  font-size: 25px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 25px;
+}
+
+.inputs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+input {
+  width: 100%;
+  padding: 13px;
+  margin-top: 7px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.results {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.card {
+  padding: 18px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.card p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.card h2 {
+  margin: 10px 0 0;
+  font-size: 24px;
+}
+
+.green { color: #16a34a; }
+.red { color: #dc2626; }
+.blue { color: #2563eb; }
+
+.net {
+  grid-column: span 2;
+  text-align: center;
+  background: #eff6ff;
+}
+
+.net h2 {
+  font-size: 34px;
+}
+
+.status {
+  text-align: center;
+  font-weight: bold;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 8px;
+  background: #e2e8f0;
+}
+
+table {
+  width: 100%;
+  margin-top: 25px;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+th {
+  background: #f1f5f9;
+  font-size: 13px;
+}
+
+.note {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 20px;
+}
+
+@media(max-width: 550px) {
+  .inputs, .results {
+    grid-template-columns: 1fr;
+  }
+
+  .net {
+    grid-column: span 1;
+  }
+
+  h1 { font-size: 21px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Trading Risk & Reward Calculator</h1>
+<p class="subtitle">Calculate Trades, Win Rate, Risk, Reward & Profit</p>
+
+<div class="inputs">
+
+<div>
+<label>Total Number of Trades</label>
+<input type="number" id="trades" value="20" min="1">
+</div>
+
+<div>
+<label>Risk Per Trade ($)</label>
+<input type="number" id="risk" value="10" min="0">
+</div>
+
+<div>
+<label>Reward Ratio (R)</label>
+<input type="number" id="rr" value="3" min="0.01" step="0.1">
+</div>
+
+<div>
+<label>Expected Win Rate (%)</label>
+<input type="number" id="winrate" value="40" min="0" max="100">
+</div>
+
+</div>
+
+<div class="results">
+
+<div class="card">
+<p>Winning Trades</p>
+<h2 class="green" id="wins">8</h2>
+</div>
+
+<div class="card">
+<p>Losing Trades</p>
+<h2 class="red" id="losses">12</h2>
+</div>
+
+<div class="card">
+<p>Actual Win Rate</p>
+<h2 class="blue" id="actualWin">40%</h2>
+</div>
+
+<div class="card">
+<p>Break-Even Win Rate</p>
+<h2 id="breakeven">25%</h2>
+</div>
+
+<div class="card">
+<p>Total Winning Profit</p>
+<h2 class="green" id="grossProfit">$240</h2>
+</div>
+
+<div class="card">
+<p>Total Losing Amount</p>
+<h2 class="red" id="grossLoss">$120</h2>
+</div>
+
+<div class="card">
+<p>Total Risk (All Trades)</p>
+<h2 id="totalRisk">$200</h2>
+</div>
+
+<div class="card">
+<p>Reward Per Winning Trade</p>
+<h2 id="reward">$30</h2>
+</div>
+
+<div class="card net">
+<p>FINAL NET PROFIT / LOSS</p>
+<h2 id="net" class="green">+$120</h2>
+<p id="netPercent">Net Return: 60% of Total Risk</p>
+</div>
+
+</div>
+
+<div class="status" id="status">
+PROFITABLE
+</div>
+
+<h3>Trade Summary</h3>
+
+<table>
+<thead>
+<tr>
+<th>Result</th>
+<th>Trades</th>
+<th>Amount</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Win</td>
+<td id="tableWins">8</td>
+<td class="green" id="tableProfit">$240</td>
+</tr>
+<tr>
+<td>Loss</td>
+<td id="tableLosses">12</td>
+<td class="red" id="tableLoss">$120</td>
+</tr>
+<tr>
+<td><b>Net</b></td>
+<td id="tableTotal">20</td>
+<td id="tableNet">$120</td>
+</tr>
+</tbody>
+</table>
+
+<p class="note">
+Note: Winning trades are rounded to the nearest whole trade.
+Commission, Spread and Slippage are not included.
+This is a mathematical estimate, not a guaranteed trading result.
+</p>
+
+</div>
+
+<script>
+
+const fields = ["trades", "risk", "rr", "winrate"];
+
+fields.forEach(id => {
+  document.getElementById(id).addEventListener("input", calculate);
+});
+
+function money(value) {
+  return "$" + value.toFixed(2);
+}
+
+function calculate() {
+
+  const trades = Math.floor(Number(document.getElementById("trades").value));
+  const risk = Number(document.getElementById("risk").value);
+  const rr = Number(document.getElementById("rr").value);
+  const winrate = Number(document.getElementById("winrate").value);
+
+  if (
+    !Number.isFinite(trades) || trades < 1 ||
+    !Number.isFinite(risk) || risk < 0 ||
+    !Number.isFinite(rr) || rr <= 0 ||
+    !Number.isFinite(winrate) || winrate < 0 || winrate > 100
+  ) {
+    document.getElementById("status").textContent = "Please enter valid values";
+    return;
+  }
+
+  const wins = Math.round(trades * winrate / 100);
+  const losses = trades - wins;
+
+  const reward = risk * rr;
+  const grossProfit = wins * reward;
+  const grossLoss = losses * risk;
+  const net = grossProfit - grossLoss;
+
+  const actualWin = wins / trades * 100;
+  const breakeven = 100 / (1 + rr);
+  const totalRisk = trades * risk;
+
+  document.getElementById("wins").textContent = wins;
+  document.getElementById("losses").textContent = losses;
+
+  document.getElementById("actualWin").textContent =
+    actualWin.toFixed(2) + "%";
+
+  document.getElementById("breakeven").textContent =
+    breakeven.toFixed(2) + "%";
+
+  document.getElementById("grossProfit").textContent =
+    money(grossProfit);
+
+  document.getElementById("grossLoss").textContent =
+    money(grossLoss);
+
+  document.getElementById("totalRisk").textContent =
+    money(totalRisk);
+
+  document.getElementById("reward").textContent =
+    money(reward);
+
+  const netElement = document.getElementById("net");
+  netElement.textContent = (net >= 0 ? "+" : "-") + money(Math.abs(net));
+  netElement.className = net >= 0 ? "green" : "red";
+
+  document.getElementById("netPercent").textContent =
+    "Net Return: " +
+    (totalRisk > 0 ? (net / totalRisk * 100).toFixed(2) : "0.00") +
+    "% of Total Risk";
+
+  document.getElementById("tableWins").textContent = wins;
+  document.getElementById("tableLosses").textContent = losses;
+  document.getElementById("tableTotal").textContent = trades;
+
+  document.getElementById("tableProfit").textContent =
+    money(grossProfit);
+
+  document.getElementById("tableLoss").textContent =
+    "-" + money(grossLoss);
+
+  document.getElementById("tableNet").textContent =
+    (net >= 0 ? "+" : "-") + money(Math.abs(net));
+
+  const status = document.getElementById("status");
+
+  if (Math.abs(net) < 0.000001) {
+    status.textContent = "BREAK EVEN";
+    status.style.color = "#d97706";
+  } else if (net > 0) {
+    status.textContent = "PROFITABLE";
+    status.style.color = "#16a34a";
+  } else {
+    status.textContent = "NOT PROFITABLE";
+    status.style.color = "#dc2626";
+  }
+}
+
+calculate();
+
+</script>
+
+</body>
+</html>
